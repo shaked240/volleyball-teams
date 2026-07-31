@@ -75,6 +75,7 @@
             font-size: 1rem;
             padding: 12px 18px;
             transition: all 0.2s;
+            user-select: none;
         }
 
         .btn-add {
@@ -189,6 +190,79 @@
             color: #64748b;
             margin-bottom: 8px;
         }
+
+        /* עיצוב לוח התוצאות */
+        .scoreboard {
+            margin-top: 20px;
+            background: #f1f5f9;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 14px;
+            display: none;
+        }
+
+        .scoreboard-title {
+            text-align: center;
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .scores-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .score-card {
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .score-display {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 6px 0;
+        }
+
+        .score-btn {
+            width: 100%;
+            padding: 10px 0;
+            font-size: 1.2rem;
+            margin-top: 4px;
+        }
+
+        .btn-plus {
+            background-color: #22c55e;
+            color: white;
+        }
+
+        .btn-minus {
+            background-color: #f3f4f6;
+            color: #64748b;
+            font-size: 1rem;
+            padding: 6px 0;
+            margin-top: 6px;
+        }
+
+        .scoreboard-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-score-action {
+            flex: 1;
+            background-color: #e2e8f0;
+            color: #475569;
+            font-size: 0.8rem;
+            padding: 6px;
+        }
     </style>
 </head>
 <body>
@@ -211,24 +285,45 @@
 
     <div class="teams-container" id="teamsResult" style="display: none;">
         <div class="team-box">
-            <div class="team-title">קבוצה א' 🟢</div>
+            <div class="team-title">קבוצה א' 🔵</div>
             <ul class="team-members" id="teamA"></ul>
         </div>
         <div class="team-box team-b">
-            <div class="team-title">קבוצה ב' 💖</div>
+            <div class="team-title">קבוצה ב' 🔴</div>
             <ul class="team-members" id="teamB"></ul>
+        </div>
+    </div>
+
+    <!-- לוח תוצאות -->
+    <div class="scoreboard" id="scoreboard">
+        <div class="scoreboard-title">📊 לוח תוצאות</div>
+        <div class="scores-grid">
+            <div class="score-card">
+                <div style="color: var(--accent); font-weight: bold;">קבוצה א'</div>
+                <div class="score-display" id="scoreA">0</div>
+                <button class="score-btn btn-plus" onclick="changeScore('A', 1)">+1</button>
+                <button class="score-btn btn-minus" onclick="changeScore('A', -1)">-1</button>
+            </div>
+            <div class="score-card">
+                <div style="color: #ec4899; font-weight: bold;">קבוצה ב'</div>
+                <div class="score-display" id="scoreB">0</div>
+                <button class="score-btn btn-plus" onclick="changeScore('B', 1)">+1</button>
+                <button class="score-btn btn-minus" onclick="changeScore('B', -1)">-1</button>
+            </div>
+        </div>
+        <div class="scoreboard-actions">
+            <button class="btn-score-action" onclick="resetScore()">🔄 איפוס תוצאה</button>
+            <button class="btn-score-action" onclick="swapSides()">🔁 החלפת צדדים במגרש</button>
         </div>
     </div>
 </div>
 
 <script>
-    // רשימת שחקני ברירת המחדל
     const defaultPlayers = ["שקד", "אור", "נועה", "סהר", "יובל", "אלון", "סלע", "מיכל", "תמר", "רז", "אביב", "נגרי"];
-    
-    // איתחול הרשימה הנוכחית
     let players = [...defaultPlayers];
+    let scoreA = 0;
+    let scoreB = 0;
 
-    // הטרגור ההתחלתי עם פתיחת האתר
     renderPlayers();
 
     function addPlayer() {
@@ -250,9 +345,11 @@
     function resetToDefault() {
         players = [...defaultPlayers];
         document.getElementById('teamsResult').style.display = 'none';
+        document.getElementById('scoreboard').style.display = 'none';
         document.getElementById('drawBtn').style.display = 'block';
         document.getElementById('redrawBtn').style.display = 'none';
         document.getElementById('copyBtn').style.display = 'none';
+        resetScore();
         renderPlayers();
     }
 
@@ -277,7 +374,6 @@
             return;
         }
 
-        // ערבוב אקראי (Fisher-Yates Shuffle)
         let shuffled = [...players];
         for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -295,14 +391,41 @@
             }
         });
 
-        // הצגת התוצאות
         document.getElementById('teamA').innerHTML = teamA.map(p => `<li>${p}</li>`).join('');
         document.getElementById('teamB').innerHTML = teamB.map(p => `<li>${p}</li>`).join('');
 
         document.getElementById('teamsResult').style.display = 'grid';
+        document.getElementById('scoreboard').style.display = 'block';
         document.getElementById('drawBtn').style.display = 'none';
         document.getElementById('redrawBtn').style.display = 'block';
         document.getElementById('copyBtn').style.display = 'block';
+
+        resetScore();
+    }
+
+    function changeScore(team, val) {
+        if (team === 'A') {
+            scoreA = Math.max(0, scoreA + val);
+            document.getElementById('scoreA').innerText = scoreA;
+        } else {
+            scoreB = Math.max(0, scoreB + val);
+            document.getElementById('scoreB').innerText = scoreB;
+        }
+    }
+
+    function resetScore() {
+        scoreA = 0;
+        scoreB = 0;
+        document.getElementById('scoreA').innerText = scoreA;
+        document.getElementById('scoreB').innerText = scoreB;
+    }
+
+    function swapSides() {
+        const tempScore = scoreA;
+        scoreA = scoreB;
+        scoreB = tempScore;
+        document.getElementById('scoreA').innerText = scoreA;
+        document.getElementById('scoreB').innerText = scoreB;
     }
 
     function copyForWhatsApp() {
@@ -310,8 +433,8 @@
         const teamB = Array.from(document.querySelectorAll('#teamB li')).map(li => li.innerText);
 
         let text = `🏐 *חלוקת קבוצות לכדורעף* 🏐\n\n`;
-        text += `🟢 *קבוצה א':*\n` + teamA.map(p => `• ${p}`).join('\n') + `\n\n`;
-        text += `💖 *קבוצה ב':*\n` + teamB.map(p => `• ${p}`).join('\n');
+        text += `🔵 *קבוצה א':*\n` + teamA.map(p => `• ${p}`).join('\n') + `\n\n`;
+        text += `🔴 *קבוצה ב':*\n` + teamB.map(p => `• ${p}`).join('\n');
 
         navigator.clipboard.writeText(text).then(() => {
             alert('הקבוצות הועתקו! אפשר להדביק בוואטסאפ.');
