@@ -255,8 +255,8 @@
             color: white;
             margin-top: 8px;
             width: 100%;
-            font-size: 0.9rem;
-            padding: 8px 0;
+            font-size: 0.85rem;
+            padding: 8px 4px;
         }
 
         .scoreboard-actions {
@@ -270,7 +270,7 @@
             background-color: #e2e8f0;
             color: #475569;
             font-size: 0.8rem;
-            padding: 6px;
+            padding: 8px;
         }
 
         /* עיצוב טבלת מובילים */
@@ -375,15 +375,12 @@
     const defaultPlayers = ["שקד", "אור", "נועה", "סהר", "יובל", "אלון", "סלע", "מיכל", "תמר", "רז", "אביב", "נגרי"];
     let players = [...defaultPlayers];
     
-    // אובייקט לשמירת הניקוד האישי של כל שחקן
     let playerScores = {};
-    
     let currentTeamA = [];
     let currentTeamB = [];
     let scoreA = 0;
     let scoreB = 0;
 
-    // איתחול הניקוד לכל השחקנים הראשוניים
     defaultPlayers.forEach(p => playerScores[p] = 0);
 
     renderPlayers();
@@ -460,8 +457,7 @@
             }
         });
 
-        document.getElementById('teamA').innerHTML = currentTeamA.map(p => `<li>${p}</li>`).join('');
-        document.getElementById('teamB').innerHTML = currentTeamB.map(p => `<li>${p}</li>`).join('');
+        updateTeamsDisplay();
 
         document.getElementById('teamsResult').style.display = 'grid';
         document.getElementById('scoreboard').style.display = 'block';
@@ -470,6 +466,11 @@
         document.getElementById('copyBtn').style.display = 'block';
 
         resetScore();
+    }
+
+    function updateTeamsDisplay() {
+        document.getElementById('teamA').innerHTML = currentTeamA.map(p => `<li>${p}</li>`).join('');
+        document.getElementById('teamB').innerHTML = currentTeamB.map(p => `<li>${p}</li>`).join('');
     }
 
     function changeScore(team, val) {
@@ -490,27 +491,31 @@
     }
 
     function swapSides() {
+        // החלפת הניקוד
         const tempScore = scoreA;
         scoreA = scoreB;
         scoreB = tempScore;
         document.getElementById('scoreA').innerText = scoreA;
         document.getElementById('scoreB').innerText = scoreB;
 
-        // החלפה גם ברשימות המקומיות לניקוד
+        // החלפה מלאה של השחקנים בין הקבוצות ברמת התצוגה והנתונים
         const tempTeam = currentTeamA;
         currentTeamA = currentTeamB;
         currentTeamB = tempTeam;
+
+        // עדכון השמות המוצגים בתיבות למעלה
+        updateTeamsDisplay();
     }
 
     function finishGame(winningTeam) {
         const winners = winningTeam === 'A' ? currentTeamA : currentTeamB;
-        const teamName = winningTeam === 'A' ? "קבוצה א'" : "קבוצה ב'";
+        const teamLabel = winningTeam === 'A' ? "קבוצה א'" : "קבוצה ב'";
 
         winners.forEach(player => {
             playerScores[player] = (playerScores[player] || 0) + 1;
         });
 
-        alert(`🎉 כל הכבוד ל${teamName}! נקודה נוספה לכל חברי הקבוצה.`);
+        alert(`🎉 כל הכבוד ל${teamLabel}! נקודה נוספה לכל חברי הקבוצה.`);
         renderLeaderboard();
         resetScore();
     }
@@ -519,9 +524,8 @@
         const listContainer = document.getElementById('leaderboardList');
         listContainer.innerHTML = '';
 
-        // מיון השחקנים לפי מספר הניצחונות (מהגבוה לנמוך)
         const sortedPlayers = Object.keys(playerScores)
-            .filter(p => players.includes(p)) // רק שחקנים שנמצאים כרגע ברשימה
+            .filter(p => players.includes(p))
             .sort((a, b) => playerScores[b] - playerScores[a]);
 
         sortedPlayers.forEach((player, idx) => {
