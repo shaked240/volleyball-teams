@@ -9,7 +9,6 @@
             --bg-color: #f0fdf4;
             --card-bg: #ffffff;
             --primary: #16a34a;
-            --primary-hover: #15803d;
             --accent: #0284c7;
             --danger: #ef4444;
             --text: #1f2937;
@@ -110,6 +109,15 @@
             display: none;
         }
 
+        .btn-reset {
+            width: 100%;
+            background-color: #cbd5e1;
+            color: #334155;
+            font-size: 0.85rem;
+            padding: 8px;
+            margin-top: 12px;
+        }
+
         .player-list {
             display: flex;
             flex-wrap: wrap;
@@ -121,18 +129,20 @@
         .tag {
             background-color: #f1f5f9;
             border: 1px solid #cbd5e1;
-            padding: 6px 12px;
+            padding: 8px 14px;
             border-radius: 20px;
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 0.95rem;
+            gap: 8px;
+            font-size: 1rem;
         }
 
         .tag .remove {
             color: var(--danger);
             cursor: pointer;
             font-weight: bold;
+            font-size: 1.1rem;
+            line-height: 1;
         }
 
         .teams-container {
@@ -187,7 +197,7 @@
     <h1>🏐 כדורעף חופים - הגרלת קבוצות</h1>
     
     <div class="input-group">
-        <input type="text" id="playerName" placeholder="הכנס שם שחקן/ית..." onkeydown="if(event.key === 'Enter') addPlayer()">
+        <input type="text" id="playerName" placeholder="הוסף שחקן אורח..." onkeydown="if(event.key === 'Enter') addPlayer()">
         <button class="btn-add" onclick="addPlayer()">הוסף</button>
     </div>
 
@@ -197,6 +207,7 @@
     <button class="btn-draw" id="drawBtn" onclick="drawTeams()">🎲 הגרל קבוצות</button>
     <button class="btn-redraw" id="redrawBtn" onclick="drawTeams()">🔄 הגרל מחדש</button>
     <button class="btn-copy" id="copyBtn" onclick="copyForWhatsApp()">📋 העתק לוואטסאפ</button>
+    <button class="btn-reset" onclick="resetToDefault()">🧹 איפוס / טען רשימת ברירת מחדל</button>
 
     <div class="teams-container" id="teamsResult" style="display: none;">
         <div class="team-box">
@@ -211,7 +222,14 @@
 </div>
 
 <script>
-    let players = [];
+    // רשימת שחקני ברירת המחדל
+    const defaultPlayers = ["שקד", "אור", "נועה", "סהר", "יובל", "אלון", "סלע", "מיכל", "תמר", "רז", "אביב", "נגרי"];
+    
+    // איתחול הרשימה הנוכחית
+    let players = [...defaultPlayers];
+
+    // הטרגור ההתחלתי עם פתיחת האתר
+    renderPlayers();
 
     function addPlayer() {
         const input = document.getElementById('playerName');
@@ -226,6 +244,15 @@
 
     function removePlayer(index) {
         players.splice(index, 1);
+        renderPlayers();
+    }
+
+    function resetToDefault() {
+        players = [...defaultPlayers];
+        document.getElementById('teamsResult').style.display = 'none';
+        document.getElementById('drawBtn').style.display = 'block';
+        document.getElementById('redrawBtn').style.display = 'none';
+        document.getElementById('copyBtn').style.display = 'none';
         renderPlayers();
     }
 
