@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מגריל הקבוצות לכדורעף חופים</title>
+    <style>
+        :root {
+            --bg-color: #f0fdf4;
+            --card-bg: #ffffff;
+            --primary: #16a34a;
+            --primary-hover: #15803d;
+            --accent: #0284c7;
+            --danger: #ef4444;
+            --text: #1f2937;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #e0f2fe;
+            background-image: linear-gradient(to bottom, #fef08a, #e0f2fe);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #0369a1;
+            margin-bottom: 16px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent);
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            padding: 12px 18px;
+            transition: all 0.2s;
+        }
+
+        .btn-add {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .btn-draw {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            font-size: 1.1rem;
+            padding: 14px;
+            margin-top: 10px;
+        }
+
+        .btn-redraw {
+            width: 100%;
+            background-color: #f59e0b;
+            color: white;
+            font-size: 1.1rem;
+            padding: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .btn-copy {
+            width: 100%;
+            background-color: #64748b;
+            color: white;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .player-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+            min-height: 40px;
+        }
+
+        .tag {
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.95rem;
+        }
+
+        .tag .remove {
+            color: var(--danger);
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .teams-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .team-box {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 12px;
+            border-top: 4px solid var(--accent);
+        }
+
+        .team-box.team-b {
+            border-top-color: #ec4899;
+        }
+
+        .team-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-align: center;
+            color: #334155;
+        }
+
+        .team-members {
+            list-style: none;
+        }
+
+        .team-members li {
+            padding: 6px 0;
+            border-bottom: 1px dashed #e2e8f0;
+            font-size: 0.95rem;
+        }
+
+        .team-members li:last-child {
+            border-bottom: none;
+        }
+
+        .counter {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏐 כדורעף חופים - הגרלת קבוצות</h1>
+    
+    <div class="input-group">
+        <input type="text" id="playerName" placeholder="הכנס שם שחקן/ית..." onkeydown="if(event.key === 'Enter') addPlayer()">
+        <button class="btn-add" onclick="addPlayer()">הוסף</button>
+    </div>
+
+    <div class="counter" id="playerCounter">שחקנים ברשימה: 0</div>
+    <div class="player-list" id="playerList"></div>
+
+    <button class="btn-draw" id="drawBtn" onclick="drawTeams()">🎲 הגרל קבוצות</button>
+    <button class="btn-redraw" id="redrawBtn" onclick="drawTeams()">🔄 הגרל מחדש</button>
+    <button class="btn-copy" id="copyBtn" onclick="copyForWhatsApp()">📋 העתק לוואטסאפ</button>
+
+    <div class="teams-container" id="teamsResult" style="display: none;">
+        <div class="team-box">
+            <div class="team-title">קבוצה א' 🟢</div>
+            <ul class="team-members" id="teamA"></ul>
+        </div>
+        <div class="team-box team-b">
+            <div class="team-title">קבוצה ב' 💖</div>
+            <ul class="team-members" id="teamB"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    let players = [];
+
+    function addPlayer() {
+        const input = document.getElementById('playerName');
+        const name = input.value.trim();
+        
+        if (name && !players.includes(name)) {
+            players.push(name);
+            input.value = '';
+            renderPlayers();
+        }
+    }
+
+    function removePlayer(index) {
+        players.splice(index, 1);
+        renderPlayers();
+    }
+
+    function renderPlayers() {
+        const listContainer = document.getElementById('playerList');
+        const counter = document.getElementById('playerCounter');
+        listContainer.innerHTML = '';
+
+        players.forEach((player, index) => {
+            const tag = document.createElement('div');
+            tag.className = 'tag';
+            tag.innerHTML = `${player} <span class="remove" onclick="removePlayer(${index})">✕</span>`;
+            listContainer.appendChild(tag);
+        });
+
+        counter.innerText = `שחקנים ברשימה: ${players.length}`;
+    }
+
+    function drawTeams() {
+        if (players.length < 2) {
+            alert('יש להזין לפחות 2 שחקנים כדי לבצע הגרלה!');
+            return;
+        }
+
+        // ערבוב אקראי (Fisher-Yates Shuffle)
+        let shuffled = [...players];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+
+        const teamA = [];
+        const teamB = [];
+
+        shuffled.forEach((player, index) => {
+            if (index % 2 === 0) {
+                teamA.push(player);
+            } else {
+                teamB.push(player);
+            }
+        });
+
+        // הצגת התוצאות
+        document.getElementById('teamA').innerHTML = teamA.map(p => `<li>${p}</li>`).join('');
+        document.getElementById('teamB').innerHTML = teamB.map(p => `<li>${p}</li>`).join('');
+
+        document.getElementById('teamsResult').style.display = 'grid';
+        document.getElementById('drawBtn').style.display = 'none';
+        document.getElementById('redrawBtn').style.display = 'block';
+        document.getElementById('copyBtn').style.display = 'block';
+    }
+
+    function copyForWhatsApp() {
+        const teamA = Array.from(document.querySelectorAll('#teamA li')).map(li => li.innerText);
+        const teamB = Array.from(document.querySelectorAll('#teamB li')).map(li => li.innerText);
+
+        let text = `🏐 *חלוקת קבוצות לכדורעף* 🏐\n\n`;
+        text += `🟢 *קבוצה א':*\n` + teamA.map(p => `• ${p}`).join('\n') + `\n\n`;
+        text += `💖 *קבוצה ב':*\n` + teamB.map(p => `• ${p}`).join('\n');
+
+        navigator.clipboard.writeText(text).then(() => {
+            alert('הקבוצות הועתקו! אפשר להדביק בוואטסאפ.');
+        });
+    }
+</script>
+
+</body>
+</html>
